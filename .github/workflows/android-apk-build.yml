@@ -43,7 +43,8 @@ jobs:
           yes | sdkmanager --licenses
 
       - name: Install Android SDK platform
-        run: sdkmanager "platform-tools" "platforms;android-37" "build-tools;37.0.0"
+        run: # API 37 is published on the Android SDK preview channel.
+          sdkmanager --channel=3 "platform-tools" "platforms;android-37" "build-tools;37.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
