@@ -28,6 +28,7 @@ import com.shyden.shytalk.data.remote.RtdbPresenceService
 import com.shyden.shytalk.data.remote.TokenService
 import com.shyden.shytalk.data.remote.VoiceService
 import com.shyden.shytalk.data.remote.WorkerApiClient
+import com.shyden.shytalk.data.auth.SupabaseGuestAuth
 import com.shyden.shytalk.data.repository.AgeVerificationRepository
 import com.shyden.shytalk.data.repository.AgeVerificationRepositoryImpl
 import com.shyden.shytalk.data.repository.AppLockRepository
@@ -134,7 +135,8 @@ val appModule =
         single { BillingService(androidContext()) }
 
         // Repositories
-        single<AuthRepository> { AuthRepositoryImpl(get(), get(), get(), BuildConfig.APPLICATION_ID, BuildConfig.EMAIL_LINK_DOMAIN) }
+        single { SupabaseGuestAuth() }
+        single<AuthRepository> { AuthRepositoryImpl(get(), get(), get(), get(), BuildConfig.APPLICATION_ID, BuildConfig.EMAIL_LINK_DOMAIN) }
         singleOf(::UserRepositoryImpl) bind UserRepository::class
         singleOf(::RoomRepositoryImpl) bind RoomRepository::class
         singleOf(::MessageRepositoryImpl) bind MessageRepository::class
