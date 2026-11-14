@@ -140,6 +140,8 @@ android {
             buildConfigField("String", "WEB_CLIENT_ID", "\"517834977595-cdu78p6q7vg57utpsvtik04c195lbh8b.apps.googleusercontent.com\"")
             buildConfigField("String", "RTDB_URL", "\"https://shytalk-7ba69-default-rtdb.asia-southeast1.firebasedatabase.app\"")
             buildConfigField("String", "EMAIL_LINK_DOMAIN", "\"shytalk.shyden.co.uk\"")
+            buildConfigField("String", "SUPABASE_URL", "\"https://gxkdptwkyhwbxyaspagd.supabase.co\"")
+            buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"sb_publishable_tLtMpyWHcotmyTpaToTNYQ_M2sWXk1r\"")
             buildConfigField("String", "LOCAL_HOST", "\"\"")
             // Prod never bakes the persona-picker password — production
             // builds must not expose any test-account shortcut.
