@@ -48,6 +48,7 @@ biometric = "1.1.0"
 ktlint = "14.2.0"
 detekt = "2.0.0-alpha.6"
 gitliveFirebase = "2.7.0"
+supabase = "3.9.0"
 
 [libraries]
 # AndroidX Core
@@ -98,6 +99,9 @@ firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging
 firebase-appcheck = { group = "com.google.firebase", name = "firebase-appcheck" }
 firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
 firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug" }
+
+# Supabase Auth (anonymous guest identity; no login screen)
+supabase-auth-kt = { group = "io.github.jan-tennert.supabase", name = "auth-kt", version.ref = "supabase" }
 
 # GitLive Firebase KMP (iOS — Android uses native Firebase SDK)
 gitlive-firebase-app = { group = "dev.gitlive", name = "firebase-app", version.ref = "gitliveFirebase" }
