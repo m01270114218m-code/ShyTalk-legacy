@@ -15,6 +15,7 @@ import kotlinx.coroutines.tasks.await
 class AuthRepositoryImpl(
     private val auth: FirebaseAuth,
     private val sessionCache: SessionCache,
+    private val supabaseGuestAuth: SupabaseGuestAuth,
     private val workerApiClient: WorkerApiClient,
     private val applicationId: String = "com.shyden.shytalk",
     private val emailLinkDomain: String = "shytalk.shyden.co.uk",
@@ -198,7 +199,18 @@ class AuthRepositoryImpl(
      * (SHY-0500 — the iPhone did forget, and drew sign-in for a signed-in
      * person).
      */
-    override suspend fun awaitPersistedSession() {\n        // Invisible account bootstrap: Supabase owns the user identity while\n        // Firebase anonymous auth remains temporarily available for legacy\n        // endpoints that have not yet migrated to Supabase JWTs. No login UI\n        // is shown to the user.\n        supabaseGuestAuth.ensureSession()\n        if (auth.currentUser == null) {\n            auth.signInAnonymously().await()\n        }\n    }
+    override suspend fun awaitPersistedSession() {
+        // Invisible guest bootstrap: every installation gets a Supabase Auth
+        // user without rendering a login screen. The session is restored by
+        // supabase-kt on subsequent launches.
+        supabaseGuestAuth.ensureSession()
+        // Keep Firebase anonymous auth only for legacy endpoints that still
+        // require a Firebase UID. This is invisible to the user and does not
+        // replace the Supabase identity.
+        if (auth.currentUser == null) {
+            auth.signInAnonymously().await()
+        }
+    }
 
     override suspend fun signOut() {
         // SHY-0497: the app has been observed back on Home AFTER sign-out
