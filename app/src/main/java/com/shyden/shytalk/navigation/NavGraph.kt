@@ -324,44 +324,7 @@ fun NavGraph(
                 )
             }
 
-            composable(Screen.SignIn.route) {
-                SignInScreen(
-                    sessionExpired = launchRedirect == LaunchRedirectReason.SESSION_EXPIRED,
-                    onSessionExpiredShown = onLaunchRedirectConsumed,
-                    pendingEmailLink = pendingEmailLink,
-                    onEmailLinkConsumed = onEmailLinkConsumed,
-                    onNavigateToEmail = {
-                        navController.navigate(Screen.EmailSignIn.route)
-                    },
-                    onAuthSuccess = { hasProfile, hasDOB, needsLegalAcceptance ->
-                        when {
-                            !hasProfile ->
-                                navController.navigate(Screen.ProfileSetup.route) {
-                                    popUpTo(Screen.SignIn.route) { inclusive = true }
-                                }
-
-                            !hasDOB ->
-                                navController.navigate(Screen.RequiredDOB.route) {
-                                    popUpTo(Screen.SignIn.route) { inclusive = true }
-                                }
-
-                            needsLegalAcceptance -> {
-                                navController.navigate(Screen.Main.route) {
-                                    popUpTo(Screen.SignIn.route) { inclusive = true }
-                                }
-                                navController.navigate(Screen.LegalAcceptance.route)
-                            }
-
-                            else ->
-                                navController.navigate(Screen.Main.route) {
-                                    popUpTo(Screen.SignIn.route) { inclusive = true }
-                                }
-                        }
-                    },
-                )
-            }
-
-            composable(Screen.EmailSignIn.route) {
+            // Guest-first auth: the app never renders a login form.\n            // The first launch creates/restores the Supabase anonymous account\n            // in the background, then enters the main shell directly.\n            composable(Screen.SignIn.route) {\n                LaunchedEffect(Unit) {\n                    try {\n                        authRepository.awaitPersistedSession()\n                        navController.navigate(Screen.Main.route) {\n                            popUpTo(Screen.SignIn.route) { inclusive = true }\n                        }\n                    } catch (e: Exception) {\n                        Log.e("NavGraph", "Guest session bootstrap failed", e)\n                    }\n                }\n                Box(modifier = Modifier.fillMaxSize()) {\n                    androidx.compose.material3.CircularProgressIndicator()\n                }\n            }\n\n            composable(Screen.EmailSignIn.route) {
                 val authViewModel: com.shyden.shytalk.feature.auth.AuthViewModel =
                     org.koin.compose.viewmodel
                         .koinViewModel()
