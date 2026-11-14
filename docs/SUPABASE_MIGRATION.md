@@ -73,7 +73,7 @@ The existing app uses Firebase UIDs plus a separate stable `uniqueId`/cohort ide
 
 ## Current status
 
-- [x] Dedicated branch created: `feature/supabase-only-no-firebase`.
+- [x] Dedicated branch created: `feature/shytalk-supabase-vox-chat`.
 - [x] Supabase project and current schema inspected read-only.
 - [x] Confirmed the current Android and Express backend are still Firebase-dependent.
 - [x] Documented the Supabase-only target and migration gates.
@@ -86,7 +86,7 @@ The existing app uses Firebase UIDs plus a separate stable `uniqueId`/cohort ide
 - [ ] Full test suite, security review and APK build.
 - [ ] Production cutover and legacy-account verification.
 
-A successful APK build alone does not prove the backend migration is complete. Completion requires all application paths to work without Firebase.
+**Implementation status:** no application runtime code has been migrated yet on this branch; the current commits are migration documentation and inventory only. A successful APK build alone does not prove the backend migration is complete. Completion requires all application paths to work without Firebase.
 
 ## Repository-wide inventory update (2026-11-15)
 
