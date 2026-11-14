@@ -1,9 +1,7 @@
 package com.shyden.shytalk.core.di
 
 import android.provider.Settings
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.database.database
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
@@ -28,7 +26,6 @@ import com.shyden.shytalk.data.remote.RtdbPresenceService
 import com.shyden.shytalk.data.remote.TokenService
 import com.shyden.shytalk.data.remote.VoiceService
 import com.shyden.shytalk.data.remote.WorkerApiClient
-import com.shyden.shytalk.data.auth.SupabaseGuestAuth
 import com.shyden.shytalk.data.repository.AgeVerificationRepository
 import com.shyden.shytalk.data.repository.AgeVerificationRepositoryImpl
 import com.shyden.shytalk.data.repository.AppLockRepository
@@ -101,7 +98,7 @@ val appModule =
         if (BuildConfig.FLAVOR == "local") {
             val host = BuildConfig.LOCAL_HOST
             Firebase.firestore.useEmulator(host, 8080)
-            Firebase.auth.useEmulator(host, 9099)
+            FirebaseAuth.getInstance().useEmulator(host, 9099)
             Firebase.database.useEmulator(host, 9000)
         }
 
@@ -135,8 +132,7 @@ val appModule =
         single { BillingService(androidContext()) }
 
         // Repositories
-        single { SupabaseGuestAuth() }
-        single<AuthRepository> { AuthRepositoryImpl(get(), get(), get(), get(), get(), BuildConfig.APPLICATION_ID, BuildConfig.EMAIL_LINK_DOMAIN) }
+        single<AuthRepository> { AuthRepositoryImpl(get(), get(), get(), BuildConfig.APPLICATION_ID, BuildConfig.EMAIL_LINK_DOMAIN) }
         singleOf(::UserRepositoryImpl) bind UserRepository::class
         singleOf(::RoomRepositoryImpl) bind RoomRepository::class
         singleOf(::MessageRepositoryImpl) bind MessageRepository::class
