@@ -15,6 +15,20 @@ plugins {
 subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
+    configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "androidx.lifecycle" &&
+                (requested.name == "lifecycle-runtime-compose" ||
+                    requested.name == "lifecycle-viewmodel-compose" ||
+                    requested.name == "lifecycle-runtime-ktx" ||
+                    requested.name == "lifecycle-viewmodel" ||
+                    requested.name == "lifecycle-process")) {
+                useVersion("2.10.0")
+                because("Keep Android builds on compileSdk 36; lifecycle 2.11.0 requires API 37.")
+            }
+        }
+    }
+
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
         version.set("1.8.0")
         android.set(true)
@@ -57,27 +71,13 @@ sonar {
         property("sonar.organization", "shydenmcm")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.gradle.skipCompile", "true")
-        // The scanner uploads and does not wait: the free plan refused the scanner's own
-        // gate wait on non-main branches ("Organization is not allowed to access data from
-        // non-main branches"). CI's `Read the SonarCloud verdict` step reads the gate of
-        // this analysis instead and fails the job on anything but OK (SHY-0625,
-        // scripts/sonar-verdict.js).
         property("sonar.qualitygate.wait", "false")
-
-        // Let the Gradle plugin auto-detect Kotlin sources from shared module.
-        // Only manually specify Express API paths (not managed by Gradle).
-        // App module excluded from sonar task (needs Android SDK) — coverage
-        // tracked via Jacoco report for classes that have unit tests.
         property("sonar.sources", "express-api/src")
         property("sonar.tests", "express-api/tests")
-
-        // Kotlin test reports — use absolute path to avoid shared/shared/ doubling
         property(
             "sonar.junit.reportPaths",
             "${rootProject.projectDir}/shared/build/test-results/jvmTest",
         )
-
-        // Exclusions (generated code, resources, translations, platform-specific KMP source sets)
         property(
             "sonar.exclusions",
             listOf(
@@ -92,59 +92,20 @@ sonar {
                 "public/js/suggestions-i18n.js",
             ).joinToString(","),
         )
-
-        // CPD (copy-paste detection) exclusions. Express admin route handlers
-        // legitimately each open with `if (await requireAdmin(req, res)) return;`
-        // — the same one-line guard appears in 167 admin handlers across 20+
-        // route files because that's how express-style middleware is layered.
-        // Sonar's "Sonar way" CPD hits 3% on the new-code metric whenever a
-        // PR touches the guard (or adds a new admin route). Refactoring this
-        // into a Router-level middleware would require splitting every mixed
-        // admin/non-admin route file (~20 files, each with a mix). For now
-        // accept the structural duplication and exclude routes from CPD —
-        // the actual logic duplication that matters (data shape, validation,
-        // domain operations) lives in helpers and IS still measured.
-        property(
-            "sonar.cpd.exclusions",
-            listOf(
-                "express-api/src/routes/**",
-            ).joinToString(","),
-        )
-
-        // Coverage exclusions — KMP shared module is tested by app/ Android unit tests
-        // (2052 tests, 0 failures) but SonarCloud only tracks JVM test coverage.
-        // Android test coverage is not visible to SonarCloud's JVM analysis.
-        // Express API coverage IS tracked via lcov (sonar.javascript.lcov.reportPaths).
         property(
             "sonar.coverage.exclusions",
             listOf(
                 "shared/src/commonMain/**",
                 "shared/src/androidMain/**",
-                // iosMain Kotlin/Native targets do not run on the JVM, so
-                // the standard JaCoCo coverage path never sees them. Tests
-                // for iOS-only Kotlin live in iosTest (no CI coverage tool
-                // hooked up yet) and are exercised via simulator + manual QA.
-                // TODO: once Kotlin/Native coverage (e.g. via konanArgs
-                // -Xcoverage-only-files) or xcresult→Cobertura is wired up,
-                // remove this exclusion so iOS code earns its 80% bar.
                 "shared/src/iosMain/**",
                 "app/src/main/**",
-                // Swift sources have no JVM-ingestible coverage tool. They
-                // are exercised via XCTest / simulator runs which produce
-                // .xcresult bundles, not jacoco XML.
-                // TODO: when adding Slather or xchtmlreport→Cobertura to CI,
-                // remove this exclusion so Swift earns its coverage bar.
                 "iosApp/**",
             ).joinToString(","),
         )
-
-        // Duplication exclusions — translation files are intentionally repetitive across locales
         property(
             "sonar.cpd.exclusions",
             "public/js/event-translations.js,public/js/legal-translations.js,public/js/suggestions-i18n.js",
         )
-
-        // Coverage reports
         property("sonar.javascript.lcov.reportPaths", "express-api/coverage/lcov.info")
         property(
             "sonar.coverage.jacoco.xmlReportPaths",
