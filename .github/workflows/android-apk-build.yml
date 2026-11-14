@@ -29,6 +29,9 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # "tools" is a retired SDK package and makes setup-android fail.
+          packages: platform-tools
 
       - name: Accept Android SDK licenses
         shell: bash
