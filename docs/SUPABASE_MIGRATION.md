@@ -84,3 +84,28 @@ The existing app uses Firebase UIDs plus a separate stable `uniqueId`/cohort ide
 - [ ] Production cutover and legacy-account verification.
 
 A successful APK build alone does not prove the backend migration is complete. Completion requires all application paths to work without Firebase.
+
+## Repository-wide inventory update (2026-11-15)
+
+The branch tree contains 3,019 tracked files. The first recursive path inventory confirms Firebase is also present outside the initially inspected Android/Express files:
+
+- Root configuration: `.firebaserc`, `firebase.json`, and Firebase-related scripts/configuration.
+- CI/local actions: Google Services decoding, Firebase rules deployment, and Firebase emulator startup actions under `.github/actions/`; workflows and local scripts also reference emulator/rules setup.
+- Shared Kotlin multiplatform module: `shared/build.gradle.kts` still includes `firebase-common`, Firebase Auth and App Check on Android, and GitLive Firebase App/Auth/Firestore/Database on iOS.
+- Android build: `app/build.gradle.kts` still applies Google Services and defines Firebase RTDB URLs and Firebase-oriented local emulator settings. The version catalog still declares the Firebase BOM, native Firebase artifacts, App Check, GitLive artifacts and Firebase-related coroutine integration.
+- Express API: Firebase Admin remains a runtime dependency; Firebase rules testing remains a development dependency. The Firebase utility initializes Firestore, Auth, RTDB and Messaging. Auth routes issue Firebase custom tokens and use Firestore for OTP/PIN/biometric state.
+- Android auth boundary: `AuthRepositoryImpl`, `IdentityRepositoryImpl` and `WorkerApiClient` are still directly coupled to Firebase Auth tokens. The shared/iOS auth implementations also need migration.
+- No tracked path containing “supabase” was found outside the migration document in this recursive path inventory. This is a path-name observation, not proof that no inline Supabase code exists; content-level search is still required.
+
+### Migration gate clarified
+
+Do not remove Firebase Gradle aliases, SDKs, CI actions, emulator configuration or server packages as an isolated cleanup: current application code imports and calls them, and doing so would knowingly break builds or runtime paths. Replace each consumer and its tests first, then remove its dependency in the same verified migration phase. The current tree shows this is a cross-platform migration (Android + iOS + Express + CI), not an Android-only dependency swap.
+
+### Newly confirmed status
+
+- [x] Recursive repository path inventory obtained (3,019 tracked files).
+- [x] Confirmed Firebase usage in Android, shared Android, iOS, Express, root configuration and CI/local actions.
+- [ ] Content-level exhaustive symbol/consumer map and per-service replacement matrix.
+- [ ] Supabase client initialization and session/auth implementation on Android and iOS.
+- [ ] Remaining migration phases listed above.
+
