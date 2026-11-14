@@ -2,9 +2,8 @@ package com.shyden.shytalk.core.di
 
 import android.provider.Settings
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.database
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
 import com.shyden.shytalk.BuildConfig
 import com.shyden.shytalk.core.room.ActiveRoomManager
 import com.shyden.shytalk.core.room.AndroidRoomServiceController
@@ -97,9 +96,9 @@ val appModule =
         // Connect to Firebase Emulators for local development
         if (BuildConfig.FLAVOR == "local") {
             val host = BuildConfig.LOCAL_HOST
-            Firebase.firestore.useEmulator(host, 8080)
+            FirebaseFirestore.getInstance().useEmulator(host, 8080)
             FirebaseAuth.getInstance().useEmulator(host, 9099)
-            Firebase.database.useEmulator(host, 9000)
+            FirebaseDatabase.getInstance().useEmulator(host, 9000)
         }
 
         // HTTP client
