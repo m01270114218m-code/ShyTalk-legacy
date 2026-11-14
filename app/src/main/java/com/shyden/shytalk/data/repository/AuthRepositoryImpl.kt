@@ -4,7 +4,6 @@ import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.shyden.shytalk.core.util.Resource
-import com.shyden.shytalk.data.auth.SupabaseGuestAuth
 import com.shyden.shytalk.core.util.firebaseCall
 import com.shyden.shytalk.core.util.logD
 import com.shyden.shytalk.core.util.logE
@@ -15,7 +14,6 @@ import kotlinx.coroutines.tasks.await
 class AuthRepositoryImpl(
     private val auth: FirebaseAuth,
     private val sessionCache: SessionCache,
-    private val supabaseGuestAuth: SupabaseGuestAuth,
     private val workerApiClient: WorkerApiClient,
     private val applicationId: String = "com.shyden.shytalk",
     private val emailLinkDomain: String = "shytalk.shyden.co.uk",
@@ -200,13 +198,8 @@ class AuthRepositoryImpl(
      * person).
      */
     override suspend fun awaitPersistedSession() {
-        // Invisible guest bootstrap: every installation gets a Supabase Auth
-        // user without rendering a login screen. The session is restored by
-        // supabase-kt on subsequent launches.
-        supabaseGuestAuth.ensureSession()
-        // Keep Firebase anonymous auth only for legacy endpoints that still
-        // require a Firebase UID. This is invisible to the user and does not
-        // replace the Supabase identity.
+        // Invisible guest bootstrap for the existing Firebase-backed services.
+        // No login screen is shown; Firebase restores this session on next launch.
         if (auth.currentUser == null) {
             auth.signInAnonymously().await()
         }
