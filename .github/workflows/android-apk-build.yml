@@ -31,10 +31,15 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses
+        shell: bash
+        run: |
+          # Keep sdkmanager's exit code while avoiding yes(1)'s SIGPIPE
+          # becoming a pipeline failure under GitHub's pipefail shell.
+          set +o pipefail
+          yes | sdkmanager --licenses
 
       - name: Install Android SDK platform
-        run: sdkmanager "platform-tools" "platforms;android-37"
+        run: sdkmanager "platform-tools" "platforms;android-37" "build-tools;36.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
