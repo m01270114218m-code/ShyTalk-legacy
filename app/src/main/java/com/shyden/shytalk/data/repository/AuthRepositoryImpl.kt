@@ -4,6 +4,7 @@ import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.shyden.shytalk.core.util.Resource
+import com.shyden.shytalk.data.auth.SupabaseGuestAuth
 import com.shyden.shytalk.core.util.firebaseCall
 import com.shyden.shytalk.core.util.logD
 import com.shyden.shytalk.core.util.logE
@@ -197,7 +198,7 @@ class AuthRepositoryImpl(
      * (SHY-0500 — the iPhone did forget, and drew sign-in for a signed-in
      * person).
      */
-    override suspend fun awaitPersistedSession() = Unit
+    override suspend fun awaitPersistedSession() {\n        // Invisible account bootstrap: Supabase owns the user identity while\n        // Firebase anonymous auth remains temporarily available for legacy\n        // endpoints that have not yet migrated to Supabase JWTs. No login UI\n        // is shown to the user.\n        supabaseGuestAuth.ensureSession()\n        if (auth.currentUser == null) {\n            auth.signInAnonymously().await()\n        }\n    }
 
     override suspend fun signOut() {
         // SHY-0497: the app has been observed back on Home AFTER sign-out
