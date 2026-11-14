@@ -53,3 +53,19 @@ This is an audit, not a claim that migration is complete.
 - [ ] Run tests and build/inspect APK.
 
 **Current truth:** Phase 0 inspection is complete. Runtime migration has not yet been implemented, and no Firebase removal or successful Supabase-only APK build is claimed.
+
+
+## Phase 0.1 — Supabase backend inspection (2026-11-15)
+
+The target project also has one deployed Edge Function: `imchat-api` (ACTIVE, version 2, JWT verification enabled).
+
+The deployed handler verifies the caller with `sb.auth.getUser()` and already contains basic handlers for profile, wallet read, room list/create/join/leave, room messages, gift catalog/send RPC, families, follows, blocks, VIP package listing, notifications and agencies.
+
+This is useful backend groundwork, but it is **not proof of a complete app migration**:
+- The Android dependency-injection module still constructs Firebase Auth/Firestore and RTDB services.
+- The Android API client still obtains Firebase ID tokens.
+- The deployed function returns 404 for routes it does not implement; private messaging, seat workflows, storage operations, purchases/VIP activation and several app-specific operations still need route-by-route parity review.
+- Existing database tables have no app data yet, so behavior cannot be assumed from schema presence alone.
+- The current handler uses a broad CORS origin and needs a security/RLS/authorization review before production reliance.
+
+No production database schema was changed in this inspection step, and no Firebase dependency was removed.
