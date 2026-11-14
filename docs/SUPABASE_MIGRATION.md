@@ -141,3 +141,27 @@ The following files were inspected on `feature/shytalk-supabase-vox-chat`; they 
 9. Run static Firebase-reference scans, unit/integration tests, security advisors, and a clean Android release build; inspect the produced APK before calling the migration complete.
 
 **Current verified result:** no application runtime migration has been committed to this branch yet. The latest commit only corrected this migration document. The successful Android workflow currently visible in the repository belongs to a different branch (`feature/supabase-full-integration`) and therefore is not evidence that this branch builds or that Firebase has been removed.
+
+
+## Live target-project audit (2026-11-15)
+
+The target project `pkqcxcfuelubonlkjgoq` was queried directly:
+
+- Project is reachable at `https://pkqcxcfuelubonlkjgoq.supabase.co`.
+- Core schema is present: profiles, wallets, rooms, room_members, chat_messages, reactions, gifts, gift_transactions, families, follows, blocks, wallet_transactions, agencies, VIP packages/subscriptions, notifications and agency join requests.
+- All inspected application tables currently contain zero rows; no production user/content data was found in those tables during this audit.
+- RLS is enabled on all inspected public application tables. Security advisor returned no findings at audit time.
+- Existing Realtime publication includes `public.room_members` and `public.chat_messages`.
+- Storage bucket `imchat-avatars` exists with owner-scoped insert/update/delete policies.
+- Auth user trigger `on_auth_user_created` calls `handle_new_auth_user()`, which is intended to provision profile/wallet records on signup.
+- Edge Function `imchat-api` is ACTIVE (version 2, JWT verification enabled). Its current routes include profile, wallet, room listing/create/join/leave, chat message read/write, gifts/send via `send_gift`, families, follows, block list, VIP package listing, notifications and agencies.
+- The function does not yet expose a complete set of app APIs: observed gaps include VIP purchase/entitlement mutation, wallet top-up/payment verification, profile editing/search, room moderation/seats/voice permissions, family management beyond create/join, agency join-request workflow, and a dedicated presence/typing service. Its current permissive CORS origin also needs to be restricted before production.
+- Publishable key is configured in Android build variants. This key is public by design and is safe only with correct RLS; no service-role key was placed in the APK.
+
+### Critical remaining client/server cutover
+
+Although Supabase project schema and one Edge Function are already present, ShyTalk's active Android runtime still constructs FirebaseAuth in `AuthRepositoryImpl.kt`, `WorkerApiClient.kt`, and Koin DI. The app's API base URLs still point to the legacy Express service, and the Express auth routes still import Firebase Admin. The app therefore does **not** yet authenticate against this Supabase project and cannot be called Supabase-only.
+
+The Android build already declares `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` BuildConfig fields, and the version catalog declares `supabase-auth-kt`; however, these declarations are configuration only and are not proof of a wired client. The shared module does not yet declare the Supabase client plugins needed for PostgREST/Realtime/Storage in its common source set.
+
+Do not remove Firebase Gradle plugins or server packages until all app and server call sites have been migrated and verified. In particular, the existing Firebase-based account identity and uniqueId mapping must be migrated without silently creating duplicate users. Guest auto-entry must use Supabase anonymous Auth, with a real persisted Auth session and owner-scoped RLS; it must not bypass Auth or expose tables to unauthenticated users.
