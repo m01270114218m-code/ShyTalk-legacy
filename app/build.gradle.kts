@@ -105,6 +105,8 @@ android {
             buildConfigField("String", "WEB_CLIENT_ID", "\"881846974606-kv99pjv92i6me0emb2j3uacbhnqqvfj4.apps.googleusercontent.com\"")
             buildConfigField("String", "RTDB_URL", "\"https://shytalk-dev-default-rtdb.europe-west1.firebasedatabase.app\"")
             buildConfigField("String", "EMAIL_LINK_DOMAIN", "\"dev.shytalk.shyden.co.uk\"")
+            buildConfigField("String", "SUPABASE_URL", "\"https://gxkdptwkyhwbxyaspagd.supabase.co\"")
+            buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"sb_publishable_tLtMpyWHcotmyTpaToTNYQ_M2sWXk1r\"")
             buildConfigField("String", "LOCAL_HOST", "\"\"")
             // Shared password for the 17 test personas (P-02..P-19) baked
             // into dev/local builds for the in-screen persona picker.
