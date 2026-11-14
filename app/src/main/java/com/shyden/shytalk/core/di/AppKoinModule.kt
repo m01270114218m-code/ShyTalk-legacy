@@ -136,7 +136,7 @@ val appModule =
 
         // Repositories
         single { SupabaseGuestAuth() }
-        single<AuthRepository> { AuthRepositoryImpl(get(), get(), get(), get(), BuildConfig.APPLICATION_ID, BuildConfig.EMAIL_LINK_DOMAIN) }
+        single<AuthRepository> { AuthRepositoryImpl(get(), get(), get(), get(), get(), BuildConfig.APPLICATION_ID, BuildConfig.EMAIL_LINK_DOMAIN) }
         singleOf(::UserRepositoryImpl) bind UserRepository::class
         singleOf(::RoomRepositoryImpl) bind RoomRepository::class
         singleOf(::MessageRepositoryImpl) bind MessageRepository::class
