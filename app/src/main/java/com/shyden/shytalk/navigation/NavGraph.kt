@@ -324,7 +324,25 @@ fun NavGraph(
                 )
             }
 
-            // Guest-first auth: the app never renders a login form.\n            // The first launch creates/restores the Supabase anonymous account\n            // in the background, then enters the main shell directly.\n            composable(Screen.SignIn.route) {\n                LaunchedEffect(Unit) {\n                    try {\n                        authRepository.awaitPersistedSession()\n                        navController.navigate(Screen.Main.route) {\n                            popUpTo(Screen.SignIn.route) { inclusive = true }\n                        }\n                    } catch (e: Exception) {\n                        Log.e("NavGraph", "Guest session bootstrap failed", e)\n                    }\n                }\n                Box(modifier = Modifier.fillMaxSize()) {\n                    androidx.compose.material3.CircularProgressIndicator()\n                }\n            }\n\n            composable(Screen.EmailSignIn.route) {
+            // Guest-first auth: do not render a login form. Bootstrap the
+            // existing anonymous Firebase session and proceed to the app shell.
+            composable(Screen.SignIn.route) {
+                LaunchedEffect(Unit) {
+                    try {
+                        authRepository.awaitPersistedSession()
+                        navController.navigate(Screen.Main.route) {
+                            popUpTo(Screen.SignIn.route) { inclusive = true }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("NavGraph", "Guest session bootstrap failed", e)
+                    }
+                }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    androidx.compose.material3.CircularProgressIndicator()
+                }
+            }
+
+            composable(Screen.EmailSignIn.route) {
                 val authViewModel: com.shyden.shytalk.feature.auth.AuthViewModel =
                     org.koin.compose.viewmodel
                         .koinViewModel()
