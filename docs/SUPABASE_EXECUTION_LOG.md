@@ -69,3 +69,19 @@ This is useful backend groundwork, but it is **not proof of a complete app migra
 - The current handler uses a broad CORS origin and needs a security/RLS/authorization review before production reliance.
 
 No production database schema was changed in this inspection step, and no Firebase dependency was removed.
+
+
+## Phase 1 — Authentication migration: implementation scope confirmed (2026-11-15)
+
+The requested scope is the **entire Firebase-to-Supabase migration**, not enabling both providers. Firebase must remain in place only until every consumer has a working Supabase replacement; it must then be removed from runtime code, platform configuration, Gradle, CI, and the server.
+
+Additional source-level findings:
+- The shared `AuthRepository` contract exposes Firebase-specific identity and token concepts (`currentFirebaseUid`, Firebase ID-token refresh, Firebase custom-token and email-link methods).
+- Android `AuthRepositoryImpl` is directly coupled to `FirebaseAuth`; it currently bootstraps an anonymous Firebase user on cold start.
+- The version catalog already declares Supabase Auth Kotlin SDK `auth-kt` version `3.9.0`, but the Android auth implementation and Koin wiring still use Firebase.
+- `WorkerApiClient` obtains and caches Firebase ID tokens and attaches Firebase App Check tokens; this must be migrated as one coordinated contract change, not by swapping only the login SDK.
+- The iOS implementation and shared contract are also Firebase-backed, so removing Firebase from Android alone would not meet the requested scope.
+
+**Safety gate:** no Firebase SDK/configuration is to be deleted until Android and iOS auth, API authorization, realtime/presence, storage, push delivery, backend verification, and tests have Supabase-compatible replacements. Existing user identity must be mapped without losing account ownership or wallet balances.
+
+**Implementation status:** source inspection only for this phase. No runtime auth code has been changed yet; no APK/build/test result is claimed.
