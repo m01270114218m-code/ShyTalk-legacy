@@ -1,8 +1,11 @@
 # Supabase-only migration for ShyTalk
 
+> **Active target (verified 2026-11-15):** Supabase project `m01270114218m-code's Project` (`pkqcxcfuelubonlkjgoq`) in organization `فوكس شات`, region `eu-west-3` (Paris). This is the user's currently active project. The schema currently contains the app's main social tables, but all inspected application tables returned zero rows. This branch is an in-progress migration; it is not yet Firebase-free and must not be released until all phases and tests pass.
+
+
 ## Target and non-negotiable requirement
 
-Target Supabase project: `gxkdptwkyhwbxyaspagd` (`https://gxkdptwkyhwbxyaspagd.supabase.co`).
+Target Supabase project: `pkqcxcfuelubonlkjgoq` (`https://pkqcxcfuelubonlkjgoq.supabase.co`).
 
 The target architecture is Supabase-only for application backend services. Firebase must be removed from the Android app, Express API, build configuration, CI, local development, tests, and runtime configuration. No Firebase Auth, Firestore, Realtime Database, Storage, Cloud Messaging, App Check, Firebase Admin SDK, Firebase emulators, Google Services Gradle plugin, or Firebase configuration files may remain in the shipped application or active project configuration.
 
