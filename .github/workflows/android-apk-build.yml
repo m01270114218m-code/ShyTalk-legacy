@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - build/shytalk-android-apk
+      - feature/supabase-full-integration
   workflow_dispatch:
 
 permissions:
