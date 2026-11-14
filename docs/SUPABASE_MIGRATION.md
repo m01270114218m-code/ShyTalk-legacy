@@ -112,3 +112,32 @@ Do not remove Firebase Gradle aliases, SDKs, CI actions, emulator configuration 
 - [ ] Supabase client initialization and session/auth implementation on Android and iOS.
 - [ ] Remaining migration phases listed above.
 
+
+
+## Verified source-code audit (2026-11-15)
+
+The following files were inspected on `feature/shytalk-supabase-vox-chat`; they still contain active Firebase runtime dependencies and are migration blockers:
+
+- `app/src/main/java/com/shyden/shytalk/data/repository/AuthRepositoryImpl.kt`: FirebaseAuth, anonymous sign-in, Google/Apple credentials, email-link auth, custom tokens, token refresh, sign-out.
+- `app/src/main/java/com/shyden/shytalk/core/di/AppKoinModule.kt`: FirebaseAuth, Firestore, Realtime Database emulator setup, RTDB presence/conversation/typing services.
+- `shared/src/commonMain/kotlin/com/shyden/shytalk/data/repository/AuthRepository.kt`: public contract documents Firebase UID/token semantics.
+- `shared/src/commonMain/kotlin/com/shyden/shytalk/data/repository/SessionCache.kt`: cache schema and account binding are explicitly Firebase-UID based.
+- `app/src/main/AndroidManifest.xml`: Firebase Installation ID metadata, Firebase Messaging service, Firebase OAuth redirect handlers.
+- `app/build.gradle.kts`: Google Services Gradle plugin remains applied.
+- `shared/build.gradle.kts`: Firebase Auth dependency remains.
+- `gradle/libs.versions.toml`: Firebase BOM, Google Services plugin, GitLive Firebase and Supabase Kotlin SDK entries remain.
+- `express-api/src/utils/firebase.js` and `express-api/src/routes/auth.js`: backend Firebase Admin Auth/Firestore/RTDB/Messaging paths remain (confirmed in earlier inventory).
+
+### Migration order required to avoid a broken intermediate build
+
+1. Add a single Supabase client/config module using only the publishable/anon key in the Android client; keep secret/service-role keys server-side.
+2. Replace AuthRepository implementation and session cache with Supabase Auth session/UUID semantics; preserve anonymous auto-entry without a login screen. Add an explicit legacy-account linking strategy before changing identity keys.
+3. Replace WorkerApiClient Firebase ID-token/App Check handling with Supabase access-token validation on the API (JWKS or Supabase Auth user verification).
+4. Replace RTDB presence, room state, messages, conversations and typing with Supabase Realtime/Postgres channels and reconnect handling.
+5. Move storage operations to Supabase Storage with bucket policies.
+6. Move wallet, gifts, VIP, purchases and rewards to server-side atomic RPC/Edge Functions; never permit client-side balance writes.
+7. Replace FCM with a separately configured non-Firebase push transport, or explicitly retain in-app Realtime-only notifications while the app is foreground/background-connected.
+8. Remove Firebase from Android, iOS, Express, CI, local emulator scripts, tests, Gradle catalog, manifests and repository configuration only after all consumers are migrated.
+9. Run static Firebase-reference scans, unit/integration tests, security advisors, and a clean Android release build; inspect the produced APK before calling the migration complete.
+
+**Current verified result:** no application runtime migration has been committed to this branch yet. The latest commit only corrected this migration document. The successful Android workflow currently visible in the repository belongs to a different branch (`feature/supabase-full-integration`) and therefore is not evidence that this branch builds or that Firebase has been removed.
