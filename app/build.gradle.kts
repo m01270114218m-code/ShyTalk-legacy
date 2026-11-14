@@ -358,6 +358,8 @@ dependencies {
     // Firebase (Auth + Firestore + FCM + RTDB — free Spark plan)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+    // Supabase Auth — anonymous guest accounts with no login UI.
+    implementation(libs.supabase.auth.kt)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.database)
     implementation(libs.firebase.messaging)
